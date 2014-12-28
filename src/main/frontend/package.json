@@ -12,8 +12,13 @@
     "bower": "latest",
     "del": "^1.1.1",
     "gulp": "^3.8.10",
+    "gulp-if": "^1.2.5",
     "gulp-inject": "^1.1.1",
+    "gulp-load-plugins": "^0.8.0",
     "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^1.0.2",
+    "gulp-using": "0.0.1",
+    "lazypipe": "^0.2.2",
     "main-bower-files": "^2.4.1",
     "path": "^0.4.9",
     "run-sequence": "^1.0.2"
