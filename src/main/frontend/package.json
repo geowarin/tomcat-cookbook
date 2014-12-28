@@ -1,0 +1,21 @@
+{
+  "name": "tomcat-cookbook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Geoffroy Warin",
+  "license": "MIT",
+  "devDependencies": {
+    "bower": "latest",
+    "del": "^1.1.1",
+    "gulp": "^3.8.10",
+    "gulp-inject": "^1.1.1",
+    "gulp-rename": "^1.2.0",
+    "main-bower-files": "^2.4.1",
+    "path": "^0.4.9",
+    "run-sequence": "^1.0.2"
+  }
+}

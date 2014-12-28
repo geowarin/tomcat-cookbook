@@ -1,0 +1,14 @@
+# Intellij
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Mac
+.DS_Store
+
+# Maven
+src/main/frontend/bower_components
+src/main/frontend/node_modules
+src/main/frontend/build
+src/main/frontend/node
