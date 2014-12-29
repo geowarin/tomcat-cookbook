@@ -3,7 +3,12 @@ var gulp = require('gulp'),
     bowerFiles = require('main-bower-files'),
     del = require('del'),
     runSequence = require('run-sequence'),
+    argv = require('yargs').argv,
+    merge = require('merge-stream'),
+    lazypipe = require('lazypipe'),
     path = require('path');
+
+var prod = !!argv.prod; // true if --prod flag is used
 
 var app = {
     js: [
@@ -30,6 +35,21 @@ gulp.task('vendor', function () {
         .pipe(gulp.dest(app.buildDir + '/vendor'));
 });
 
+gulp.task('minify', function () {
+    var vendor =
+        gulp.src(bowerFiles(), {base: 'bower_components'})
+            .pipe($.if('*.js', minifyJs('vendor.min.js')()))
+            .pipe($.if('*.css', minifyCss('vendor.min.css')()))
+            .pipe(gulp.dest('build/vendor'));
+
+    var appJs =
+        gulp.src(app.js, {cwd: 'src'})
+            .pipe($.if('*.js', minifyJs('app.min.js')()))
+            .pipe(gulp.dest('build/js'));
+
+    return merge(vendor, appJs);
+});
+
 gulp.task('processIndex', function () {
     return gulp.src('src/html/index.html')
         .pipe(gulp.dest(app.buildDir));
@@ -50,6 +70,25 @@ gulp.task('injectIntoIndex', ['processIndex'], function () {
         ))
         .pipe(gulp.dest(app.buildDir));
 });
+
+var minifyJs = function (destFile) {
+    return lazypipe()
+        .pipe(function () {
+            return $.if(prod, $.concat(destFile));
+        })
+        .pipe(function () {
+            return $.if(prod, $.uglify());
+        });
+};
+var minifyCss = function (destFile) {
+    return lazypipe()
+        .pipe(function () {
+            return $.if(prod, $.concat(destFile));
+        })
+        .pipe(function () {
+            return $.if(prod, $.csso());
+        });
+};
 
 gulp.task('moveToWebapp', function () {
     return gulp.src(['build/**'])
