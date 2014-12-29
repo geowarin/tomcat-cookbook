@@ -35,6 +35,18 @@ gulp.task('vendor', function () {
         .pipe(gulp.dest(app.buildDir + '/vendor'));
 });
 
+gulp.task('minVendor', ['processIndex'], function () {
+    var vendor = gulp.src(bowerFiles(), {base: 'bower_components'})
+        .pipe($.if('*.js', minifyJs('vendor.min.js')()))
+        .pipe($.if('*.css', minifyCss('vendor.min.css')()))
+        .pipe(gulp.dest('build/vendor'));
+
+    return gulp.src(app.buildDir + '/index.html')
+        .pipe($.inject(vendor,
+            {name: 'bower', relative: true}
+        ));
+});
+
 gulp.task('minify', function () {
     var vendor =
         gulp.src(bowerFiles(), {base: 'bower_components'})
