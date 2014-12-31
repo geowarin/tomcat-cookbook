@@ -4,9 +4,7 @@ var gulp = require('gulp'),
     del = require('del'),
     runSequence = require('run-sequence'),
     argv = require('yargs').argv,
-    merge = require('merge-stream'),
-    lazypipe = require('lazypipe'),
-    path = require('path');
+    lazypipe = require('lazypipe');
 
 var prod = !!argv.prod; // true if --prod flag is used
 
@@ -25,61 +23,24 @@ gulp.task('clean', function (cb) {
     return del([app.buildDir], cb);
 });
 
-gulp.task('appJs', function () {
-    return gulp.src('src/js/**/*.js')
-        .pipe(gulp.dest(app.buildDir + '/js'));
+gulp.task('moveIndex', function () {
+    return gulp.src('src/html/index.html')
+        .pipe(gulp.dest(app.buildDir));
 });
 
-gulp.task('vendor', function () {
-    return gulp.src(bowerFiles(), {base: 'bower_components'})
-        .pipe(gulp.dest(app.buildDir + '/vendor'));
-});
-
-gulp.task('minVendor', ['processIndex'], function () {
+gulp.task('inject', ['moveIndex'], function () {
     var vendor = gulp.src(bowerFiles(), {base: 'bower_components'})
         .pipe($.if('*.js', minifyJs('vendor.min.js')()))
         .pipe($.if('*.css', minifyCss('vendor.min.css')()))
         .pipe(gulp.dest('build/vendor'));
 
+    var js = gulp.src(app.js, {cwd: 'src'})
+        .pipe($.if('*.js', minifyJs('app.min.js')()))
+        .pipe(gulp.dest('build/js'));
+
     return gulp.src(app.buildDir + '/index.html')
-        .pipe($.inject(vendor,
-            {name: 'bower', relative: true}
-        ));
-});
-
-gulp.task('minify', function () {
-    var vendor =
-        gulp.src(bowerFiles(), {base: 'bower_components'})
-            .pipe($.if('*.js', minifyJs('vendor.min.js')()))
-            .pipe($.if('*.css', minifyCss('vendor.min.css')()))
-            .pipe(gulp.dest('build/vendor'));
-
-    var appJs =
-        gulp.src(app.js, {cwd: 'src'})
-            .pipe($.if('*.js', minifyJs('app.min.js')()))
-            .pipe(gulp.dest('build/js'));
-
-    return merge(vendor, appJs);
-});
-
-gulp.task('processIndex', function () {
-    return gulp.src('src/html/index.html')
-        .pipe(gulp.dest(app.buildDir));
-});
-
-gulp.task('injectIntoIndex', ['processIndex'], function () {
-    var vendors = bowerFiles().map(function (p) {
-        return 'vendor/' + path.relative('bower_components', p);
-    });
-    return gulp.src(app.buildDir + '/index.html')
-        .pipe($.inject(
-            gulp.src(vendors, {read: false, cwd: app.buildDir}),
-            {name: 'bower', relative: true}
-        ))
-        .pipe($.inject(
-            gulp.src(app.js, {read: false, cwd: app.buildDir}),
-            {name: 'all', relative: true}
-        ))
+        .pipe($.inject(vendor, {name: 'bower', relative: true}))
+        .pipe($.inject(js, {name: 'all', relative: true}))
         .pipe(gulp.dest(app.buildDir));
 });
 
@@ -108,5 +69,5 @@ gulp.task('moveToWebapp', function () {
 });
 
 gulp.task('default', function () {
-    return runSequence('clean', ['appJs', 'vendor'], 'injectIntoIndex', 'moveToWebapp');
+    return runSequence('clean', 'inject', 'moveToWebapp');
 });
