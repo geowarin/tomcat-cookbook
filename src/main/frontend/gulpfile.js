@@ -10,11 +10,11 @@ var prod = !!argv.prod; // true if --prod flag is used
 
 var paths = {
     js: [
-        'js/models/**/*.js',
-        'js/collections/*.js',
-        'js/routers/*.js',
-        'js/views/*.js',
-        'js/app.js'
+        'src/js/models//*.js',
+        'src/js/collections/*.js',
+        'src/js/routers/*.js',
+        'src/js/views/*.js',
+        'src/js/app.js'
     ],
     build : {
         base: 'build',
@@ -45,9 +45,9 @@ gulp.task('inject', ['moveIndex'], function () {
         .pipe($.if('*.css', minifyCss('vendor.min.css')()))
         .pipe(gulp.dest(paths.build.vendor));
 
-    var js = gulp.src(paths.js, {cwd: 'src'})
+    var js = gulp.src(paths.js, {base: 'src'})
         .pipe($.if('*.js', minifyJs('app.min.js')()))
-        .pipe(gulp.dest(paths.build.js));
+        .pipe(gulp.dest(paths.build.base));
 
     return gulp.src(paths.build.index)
         .pipe($.inject(vendor, {name: 'bower', relative: true}))
